@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+
+# Django/local databases
+data.db
+scr.db
+*.sqlite3
+staticfiles/
+
+# Node/Vite
+node_modules/
+templates/node_modules/
+templates/dist/
+templates/tasks/templates/dist/
+templates/tsconfig.tsbuildinfo
+templates/vite-dev*.log
+
+# Local configuration and tools
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+.postman/
+ngrok.exe
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
