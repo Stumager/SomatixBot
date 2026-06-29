@@ -61,7 +61,7 @@ export function TaskerPage() {
       transition={{ duration: 0.3 }}
     >
       {/* Dashboard */}
-      <TaskDashboard />
+      <TaskDashboard tasks={tasks} />
 
       {/* Add Task Button */}
       <Button

@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { CheckCircle2, Edit2, Trash2 } from "lucide-react";
 import type { Task } from "../../../types/task";
 import { useProgress } from "../../../hooks/useProgress";
+import { isVisuallyOverdue } from "../../../utils/progress";
 import { Card } from "../../ui/Card";
 
 interface TaskItemProps {
@@ -13,18 +13,11 @@ interface TaskItemProps {
 }
 
 export function TaskItem({ task, onComplete, onEdit, onDelete }: TaskItemProps) {
-  const [status, setStatus] = useState<Task["status"]>(task.status);
   const progress = useProgress(task.created_at, task.due_date);
-
-  useEffect(() => {
-    setStatus(task.status);
-  }, [task.status]);
-
-  useEffect(() => {
-    if (status === "active" && progress >= 100) {
-      setStatus("overdue");
-    }
-  }, [progress, status]);
+  const status: Task["status"] =
+    task.status === "completed" ? "completed"
+    : isVisuallyOverdue(task.status, task.due_date) ? "overdue"
+    : "active";
 
   const dueTime = new Date(task.due_date).toLocaleTimeString("ru-RU", {
     hour: "2-digit",
@@ -44,7 +37,6 @@ export function TaskItem({ task, onComplete, onEdit, onDelete }: TaskItemProps) 
 
   const handleComplete = () => {
     onComplete({ ...task, status: "completed" });
-    setStatus("completed");
   };
 
   return (

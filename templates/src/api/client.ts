@@ -3,7 +3,6 @@ import axios, {
   type AxiosRequestConfig,
   type InternalAxiosRequestConfig,
 } from "axios";
-import { queryClient } from "./queryClient";
 
 const ACCESS_TOKEN_KEY = "access_token";
 const REFRESH_TOKEN_KEY = "refresh_token";
@@ -18,13 +17,11 @@ type ApiRequestConfig = InternalAxiosRequestConfig & {
   _retry?: boolean;
   skipAuthHeader?: boolean;
   skipAuthRetry?: boolean;
-  skipCacheInvalidation?: boolean;
 };
 
 type PublicRequestConfig = AxiosRequestConfig & {
   skipAuthHeader?: boolean;
   skipAuthRetry?: boolean;
-  skipCacheInvalidation?: boolean;
 };
 
 export const apiClient = axios.create({
@@ -61,7 +58,6 @@ function authRequestConfig(): PublicRequestConfig {
   return {
     skipAuthHeader: true,
     skipAuthRetry: true,
-    skipCacheInvalidation: true,
   };
 }
 
@@ -118,18 +114,7 @@ apiClient.interceptors.request.use((config) => {
 });
 
 apiClient.interceptors.response.use(
-  (response) => {
-    const method = response.config.method?.toLowerCase();
-    const shouldInvalidate =
-      (method === "post" || method === "patch") &&
-      !(response.config as ApiRequestConfig).skipCacheInvalidation;
-
-    if (shouldInvalidate) {
-      queryClient.invalidateQueries();
-    }
-
-    return response;
-  },
+  (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as ApiRequestConfig | undefined;
 

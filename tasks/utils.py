@@ -1,3 +1,5 @@
+import logging
+
 import requests
 from django.conf import settings
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -5,47 +7,65 @@ from django.utils import timezone
 from datetime import timedelta
 from .models import Task
 
+logger = logging.getLogger(__name__)
 
 
 def send_telegram_message(user_id, text):
     bot_token = settings.BOT_TOKEN
+    if not bot_token:
+        logger.warning("BOT_TOKEN not configured, skipping notification")
+        return
     url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
     payload = {
-        'chat_id':user_id,
-        'text':text,
-        'parse_mode':'HTML',
+        'chat_id': user_id,
+        'text': text,
+        'parse_mode': 'HTML',
     }
     try:
-        requests.post(url, json=payload)
-    except Exception as e:
-        print(f'Ошибка отправки: {e}')
+        resp = requests.post(url, json=payload, timeout=10)
+        if not resp.ok:
+            logger.error("Telegram API error %s: %s", resp.status_code, resp.text)
+    except Exception:
+        logger.exception("Failed to send Telegram message to %s", user_id)
+
 
 def check_and_send_notification():
-    now = timezone.now().replace(second=0, microsecond=0)
-    is_one_hour = now + timedelta(hours=1)
+    now = timezone.now()
 
+    one_hour_later = now + timedelta(hours=1)
     tasks_1h = Task.objects.filter(
-        date=is_one_hour,
         date__gt=now,
+        date__lte=one_hour_later,
         notification_1h_left=False,
         done=False,
-    )
+    ).select_related('user__profile')
+
+    ids_1h = []
     for task in tasks_1h:
-        if hasattr(task.user, 'profile') and task.user.profile.telegram_id:
-            send_telegram_message(task.user.profile.telegram_id, f"Задача через час: <b>{task.name}</b>")
-            task.notification_1h_left = True
-            task.save()
+        profile = getattr(task.user, 'profile', None)
+        if profile and profile.telegram_id:
+            send_telegram_message(profile.telegram_id, f"Задача через час: <b>{task.name}</b>")
+            ids_1h.append(task.pk)
+
+    if ids_1h:
+        Task.objects.filter(pk__in=ids_1h).update(notification_1h_left=True)
 
     tasks_due = Task.objects.filter(
-        date=now,
+        date__lte=now,
         notification_due_left=False,
         done=False,
-    )
+    ).select_related('user__profile')
+
+    ids_due = []
     for task in tasks_due:
-        if hasattr(task.user, 'profile') and task.user.profile.telegram_id:
-            send_telegram_message(task.user.profile.telegram_id, f"Пора выполнить задачу: <b>{task.name}</b>!")
-            task.notification_due_left = True
-            task.save()
+        profile = getattr(task.user, 'profile', None)
+        if profile and profile.telegram_id:
+            send_telegram_message(profile.telegram_id, f"Пора выполнить задачу: <b>{task.name}</b>!")
+            ids_due.append(task.pk)
+
+    if ids_due:
+        Task.objects.filter(pk__in=ids_due).update(notification_due_left=True)
+
 
 def start_notification_scheduler():
     scheduler = BackgroundScheduler()

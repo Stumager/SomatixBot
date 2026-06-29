@@ -4,7 +4,7 @@ import { Button } from "../../ui/Button";
 import { Card } from "../../ui/Card";
 
 interface WorkoutCardProps {
-  workout: any;
+  workout: Workout;
   onStart?: (workout: Workout) => void;
   onEdit?: (workout: Workout) => void;
 }
@@ -20,12 +20,12 @@ export function WorkoutCard({ workout, onStart, onEdit }: WorkoutCardProps) {
   });
 
   const muscleGroups = [...new Set(
-    (workout.exercise_grouped ?? workout.exercises ?? []).map((eg: any) => eg.muscle_category_name ?? eg.muscleGroup),
+    workout.exercises.map((e) => e.muscleGroup),
   )]
     .filter(Boolean)
     .join(", ");
 
-  const totalVolume = workout.totalTonnage ?? workout.total_volume ?? 0;
+  const totalVolume = workout.totalTonnage;
   const statusBadge = workout.status === "completed" ? "Выполнено" : "Запланировано";
   const statusColor = workout.status === "completed" ? "text-green-600" : "text-blue-600";
 

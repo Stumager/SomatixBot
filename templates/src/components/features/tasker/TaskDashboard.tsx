@@ -1,8 +1,11 @@
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
-import { useTasks } from "../../../api/tasks";
+import type { Task } from "../../../types/task";
 
-export function TaskDashboard() {
-  const { data: tasks = [] } = useTasks();
+interface TaskDashboardProps {
+  tasks: Task[];
+}
+
+export function TaskDashboard({ tasks }: TaskDashboardProps) {
 
   const stats = {
     active: tasks.filter((task) => task.status === "active").length,

@@ -87,8 +87,9 @@ def telegram_auth_view(request):
             user.save(update_fields=fields_to_update)
 
         profile, _ = UserProfile.objects.get_or_create(user=user)
-        profile.telegram_id = str(tg_id)
-        profile.save(update_fields=["telegram_id"])
+        if profile.telegram_id != str(tg_id):
+            profile.telegram_id = str(tg_id)
+            profile.save(update_fields=["telegram_id"])
 
         refresh = RefreshToken.for_user(user)
         return Response(

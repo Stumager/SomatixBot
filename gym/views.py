@@ -46,13 +46,16 @@ class WorkoutDetailAPIView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         task_id = self.kwargs["task_id"]
         task = get_object_or_404(Task, id=task_id, user=self.request.user)
-        queryset = Workout.objects.select_related("task", "user").prefetch_related(
-            "sets__exercise"
+        workout, created = Workout.objects.get_or_create(
+            task=task, defaults={"user": self.request.user}
         )
-        workout, _ = queryset.get_or_create(task=task, defaults={"user": self.request.user})
         if workout.user_id != self.request.user.id:
             raise PermissionDenied("Тренировка привязана к другому пользователю.")
-        return workout
+        return (
+            Workout.objects.select_related("task", "user")
+            .prefetch_related("sets__exercise__muscle_category")
+            .get(pk=workout.pk)
+        )
 
 
 class SetLogCreateAPIView(generics.CreateAPIView):
@@ -75,7 +78,7 @@ class WorkoutHistoryListView(generics.ListAPIView):
         return (
             Workout.objects.filter(user=self.request.user, is_finished=True)
             .select_related("task")
-            .prefetch_related("sets__exercise")
+            .prefetch_related("sets__exercise__muscle_category")
             .order_by("-date")
         )
 
@@ -88,7 +91,7 @@ class WorkoutCreateAPIView(generics.ListCreateAPIView):
         return (
             Workout.objects.filter(user=self.request.user)
             .select_related("task")
-            .prefetch_related("sets__exercise")
+            .prefetch_related("sets__exercise__muscle_category")
             .order_by("-date")
         )
 
@@ -118,7 +121,7 @@ class WorkoutByIdDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         return (
             Workout.objects.filter(user=self.request.user)
             .select_related("task")
-            .prefetch_related("sets__exercise")
+            .prefetch_related("sets__exercise__muscle_category")
         )
 
 
@@ -160,7 +163,7 @@ class WorkoutFinishAPIView(APIView):
         refreshed = (
             Workout.objects.filter(pk=workout.pk, user=request.user)
             .select_related("task")
-            .prefetch_related("sets__exercise")
+            .prefetch_related("sets__exercise__muscle_category")
             .get()
         )
         return Response(WorkoutSerializer(refreshed, context={"request": request}).data)

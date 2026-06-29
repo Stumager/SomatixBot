@@ -110,7 +110,7 @@ class WorkoutSerializer(serializers.ModelSerializer):
         return sum(float(item.weight) * item.repetitions for item in obj.sets.all())
 
     def get_exercise_grouped(self, obj):
-        sets = obj.sets.all().select_related("exercise__muscle_category")
+        sets = obj.sets.all()
         grouped = {}
 
         for item in sets:

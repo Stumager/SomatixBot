@@ -15,24 +15,31 @@ export function DateTimePicker({ value, onChange }: DateTimePickerProps) {
     const parsed = new Date(value);
     if (Number.isNaN(parsed.getTime())) return;
 
-    const isoDate = parsed.toISOString().split("T")[0];
-    const time = parsed.toTimeString().split(":").slice(0, 2).join(":");
-    setSelectedDate(isoDate);
-    setSelectedTime(time);
+    const y = parsed.getFullYear();
+    const m = String(parsed.getMonth() + 1).padStart(2, "0");
+    const d = String(parsed.getDate()).padStart(2, "0");
+    setSelectedDate(`${y}-${m}-${d}`);
+
+    const hh = String(parsed.getHours()).padStart(2, "0");
+    const mm = String(parsed.getMinutes()).padStart(2, "0");
+    setSelectedTime(`${hh}:${mm}`);
   }, [value]);
+
+  const emitChange = (date: string, time: string) => {
+    if (date) {
+      const local = new Date(`${date}T${time}:00`);
+      onChange(local.toISOString());
+    }
+  };
 
   const handleDateChange = (dateValue: string) => {
     setSelectedDate(dateValue);
-    if (dateValue) {
-      onChange(`${dateValue}T${selectedTime}:00`);
-    }
+    emitChange(dateValue, selectedTime);
   };
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedTime(e.target.value);
-    if (selectedDate) {
-      onChange(`${selectedDate}T${e.target.value}:00`);
-    }
+    emitChange(selectedDate, e.target.value);
   };
 
   const today = new Date().toISOString().split("T")[0];
