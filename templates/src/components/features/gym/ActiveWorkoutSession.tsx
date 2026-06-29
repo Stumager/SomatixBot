@@ -49,14 +49,22 @@ export function ActiveWorkoutSession({ onExerciseClick, readOnly = false }: Acti
           </div>
 
           <div className="space-y-2">
+            <div className="flex items-center gap-2 px-1">
+              <span className="w-14 text-[10px] font-semibold uppercase text-[var(--tg-theme-hint-color)]">№</span>
+              <span className="min-w-0 flex-1 text-[10px] font-semibold uppercase text-[var(--tg-theme-hint-color)]">Вес, кг</span>
+              <span className="w-20 text-[10px] font-semibold uppercase text-[var(--tg-theme-hint-color)]">Повт.</span>
+              <span className="w-8" />
+            </div>
             {exercise.sets.map((set, index) => (
               <div key={set.id} className="flex items-center gap-2">
-                <span className="w-16 text-xs font-semibold text-[var(--tg-theme-hint-color)]">
-                  Подход {index + 1}
+                <span className="w-14 text-center text-xs font-bold text-[var(--tg-theme-hint-color)]">
+                  {index + 1}
                 </span>
                 <input
                   type="number"
+                  inputMode="decimal"
                   min="0"
+                  step="0.5"
                   value={set.weight || ""}
                   onChange={(event) =>
                     !readOnly &&
@@ -65,12 +73,13 @@ export function ActiveWorkoutSession({ onExerciseClick, readOnly = false }: Acti
                       weight: parseFloat(event.target.value) || 0,
                     })
                   }
-                  placeholder="Вес"
+                  placeholder="0"
                   disabled={readOnly}
-                  className="min-w-0 flex-1 rounded bg-[var(--tg-theme-bg-color)] px-2 py-2 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-70"
+                  className="min-w-0 flex-1 rounded-lg bg-[var(--tg-theme-bg-color)] px-3 py-2.5 text-center text-sm font-medium outline-none disabled:cursor-not-allowed disabled:opacity-70"
                 />
                 <input
                   type="number"
+                  inputMode="numeric"
                   min="0"
                   value={set.reps || ""}
                   onChange={(event) =>
@@ -80,13 +89,13 @@ export function ActiveWorkoutSession({ onExerciseClick, readOnly = false }: Acti
                       reps: parseInt(event.target.value, 10) || 0,
                     })
                   }
-                  placeholder="Повт."
+                  placeholder="0"
                   disabled={readOnly}
-                  className="w-20 rounded bg-[var(--tg-theme-bg-color)] px-2 py-2 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-70"
+                  className="w-20 rounded-lg bg-[var(--tg-theme-bg-color)] px-3 py-2.5 text-center text-sm font-medium outline-none disabled:cursor-not-allowed disabled:opacity-70"
                 />
                 <button
                   onClick={() => removeSet(exercise.id, set.id)}
-                  className="rounded p-1 text-red-500 hover:bg-red-500/20"
+                  className="w-8 rounded-lg p-1.5 text-red-500/70 hover:bg-red-500/10 hover:text-red-500"
                   type="button"
                   disabled={readOnly}
                 >
@@ -106,7 +115,7 @@ export function ActiveWorkoutSession({ onExerciseClick, readOnly = false }: Acti
               });
             }}
             whileTap={{ scale: 0.95 }}
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded bg-[var(--tg-theme-button-color)] py-2 text-xs font-semibold text-[var(--tg-theme-button-text-color)] disabled:cursor-not-allowed disabled:opacity-70"
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-[var(--tg-theme-hint-color)]/30 py-2.5 text-xs font-semibold text-[var(--tg-theme-hint-color)] disabled:cursor-not-allowed disabled:opacity-70"
             type="button"
             disabled={readOnly}
           >

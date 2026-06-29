@@ -22,13 +22,19 @@ export function AddTaskModal({ isOpen, onClose, onSave, editingTask }: AddTaskMo
   const [categoryId, setCategoryId] = useState(editingTask?.category_id || "");
   const [dueDate, setDueDate] = useState(editingTask?.due_date || "");
   const [error, setError] = useState("");
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [showCategoryInput, setShowCategoryInput] = useState(false);
 
   useEffect(() => {
-    setTitle(editingTask?.title || "");
-    setCategoryId(editingTask?.category_id || "");
-    setDueDate(editingTask?.due_date || "");
-    setError("");
-  }, [editingTask]);
+    if (isOpen) {
+      setTitle(editingTask?.title || "");
+      setCategoryId(editingTask?.category_id || "");
+      setDueDate(editingTask?.due_date || "");
+      setError("");
+      setNewCategoryName("");
+      setShowCategoryInput(false);
+    }
+  }, [isOpen, editingTask]);
 
   const handleSave = () => {
     if (!title.trim()) {
@@ -53,26 +59,42 @@ export function AddTaskModal({ isOpen, onClose, onSave, editingTask }: AddTaskMo
   };
 
   const handleAddCategory = async () => {
-    const name = prompt("Название новой категории:");
-    if (!name?.trim()) return;
+    if (!showCategoryInput) {
+      setShowCategoryInput(true);
+      return;
+    }
+
+    if (!newCategoryName.trim()) return;
 
     try {
-      const category = await createCategoryMutation.mutateAsync(name.trim());
+      const category = await createCategoryMutation.mutateAsync(newCategoryName.trim());
       setCategoryId(category.id);
+      setNewCategoryName("");
+      setShowCategoryInput(false);
     } catch {
       setError("Не удалось создать категорию.");
     }
   };
 
-  const handleDeleteCategory = async () => {
+  const handleDeleteCategory = () => {
     if (!categoryId) return;
-    if (!confirm("Удалить выбранную категорию?")) return;
 
-    try {
-      await deleteCategoryMutation.mutateAsync(categoryId);
-      setCategoryId("");
-    } catch {
-      setError("Не удалось удалить категорию.");
+    const doDelete = async () => {
+      try {
+        await deleteCategoryMutation.mutateAsync(categoryId);
+        setCategoryId("");
+      } catch {
+        setError("Не удалось удалить категорию.");
+      }
+    };
+
+    const tg = window.Telegram?.WebApp;
+    if (tg?.showConfirm) {
+      tg.showConfirm("Удалить выбранную категорию?", (ok: boolean) => {
+        if (ok) doDelete();
+      });
+    } else if (window.confirm("Удалить выбранную категорию?")) {
+      doDelete();
     }
   };
 
@@ -160,6 +182,26 @@ export function AddTaskModal({ isOpen, onClose, onSave, editingTask }: AddTaskMo
                     </button>
                   )}
                 </div>
+                {showCategoryInput && (
+                  <div className="mt-2 flex gap-2">
+                    <input
+                      type="text"
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleAddCategory()}
+                      placeholder="Название категории"
+                      autoFocus
+                      className="min-w-0 flex-1 rounded-lg bg-[var(--tg-theme-secondary-bg-color)] px-3 py-2 text-sm text-tg-text outline-none placeholder:text-[var(--tg-theme-hint-color)]"
+                    />
+                    <button
+                      onClick={() => { setShowCategoryInput(false); setNewCategoryName(""); }}
+                      className="rounded-lg bg-[var(--tg-theme-secondary-bg-color)] px-3 py-2 text-[var(--tg-theme-hint-color)]"
+                      type="button"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div>

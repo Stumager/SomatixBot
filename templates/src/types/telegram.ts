@@ -26,6 +26,8 @@ export interface TelegramWebApp {
   offEvent?: (eventType: "viewportChanged", eventHandler: () => void) => void;
   setHeaderColor?: (color: "bg_color" | "secondary_bg_color" | string) => void;
   setBackgroundColor?: (color: "bg_color" | "secondary_bg_color" | string) => void;
+  showConfirm?: (message: string, callback: (ok: boolean) => void) => void;
+  showAlert?: (message: string, callback?: () => void) => void;
 }
 
 declare global {

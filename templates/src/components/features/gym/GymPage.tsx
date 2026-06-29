@@ -96,12 +96,26 @@ export function GymPage() {
   };
 
   const handleCancelWorkout = () => {
-    if (activeExercises.length === 0 || confirm("Отменить текущую тренировку?")) {
+    const doCancel = () => {
       clearWorkout();
       setIsActiveWorkout(false);
       setActiveWorkoutId(undefined);
       setIsScheduleOpen(false);
       setSelectedDateTime("");
+    };
+
+    if (activeExercises.length === 0) {
+      doCancel();
+      return;
+    }
+
+    const tg = window.Telegram?.WebApp;
+    if (tg?.showConfirm) {
+      tg.showConfirm("Отменить текущую тренировку?", (ok: boolean) => {
+        if (ok) doCancel();
+      });
+    } else if (window.confirm("Отменить текущую тренировку?")) {
+      doCancel();
     }
   };
 
@@ -232,22 +246,30 @@ export function GymPage() {
         <h3 className="mb-3 text-xs font-semibold uppercase text-[var(--tg-theme-hint-color)]">
           История
         </h3>
-        <div className="space-y-2">
-          {sortedWorkouts.map((workout, index) => (
-            <motion.div
-              key={workout.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
-            >
-              <WorkoutCard 
-                workout={workout} 
-                onStart={handleStartWorkout} 
-                onEdit={handleEditWorkout}
-              />
-            </motion.div>
-          ))}
-        </div>
+        {sortedWorkouts.length === 0 ? (
+          <div className="rounded-lg bg-[var(--tg-theme-secondary-bg-color)] p-6 text-center">
+            <p className="text-sm text-[var(--tg-theme-hint-color)]">
+              Пока нет тренировок. Начните первую!
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {sortedWorkouts.map((workout, index) => (
+              <motion.div
+                key={workout.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <WorkoutCard
+                  workout={workout}
+                  onStart={handleStartWorkout}
+                  onEdit={handleEditWorkout}
+                />
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </motion.div>
   );

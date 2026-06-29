@@ -25,15 +25,21 @@ export function TaskItem({ task, onComplete, onEdit, onDelete }: TaskItemProps) 
   });
 
   const categoryName = task.category_name || "Без категории";
-  const categoryColors: Record<string, string> = {
-    Здоровье: "bg-blue-500/20 text-blue-600",
-    Работа: "bg-purple-500/20 text-purple-600",
-    Тренировки: "bg-orange-500/20 text-orange-600",
-    Gym: "bg-orange-500/20 text-orange-600",
-    "Без категории": "bg-slate-200 text-slate-700",
-  };
-  const categoryClass =
-    categoryColors[categoryName] || "bg-[var(--tg-theme-secondary-bg-color)] text-tg-text";
+
+  const palette = [
+    "bg-blue-500/20 text-blue-600",
+    "bg-purple-500/20 text-purple-600",
+    "bg-orange-500/20 text-orange-600",
+    "bg-emerald-500/20 text-emerald-600",
+    "bg-pink-500/20 text-pink-600",
+    "bg-amber-500/20 text-amber-600",
+    "bg-cyan-500/20 text-cyan-600",
+    "bg-rose-500/20 text-rose-600",
+  ];
+
+  const categoryClass = categoryName === "Без категории"
+    ? "bg-[var(--tg-theme-hint-color)]/15 text-[var(--tg-theme-hint-color)]"
+    : palette[Math.abs([...categoryName].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 0)) % palette.length];
 
   const handleComplete = () => {
     onComplete({ ...task, status: "completed" });
@@ -44,7 +50,7 @@ export function TaskItem({ task, onComplete, onEdit, onDelete }: TaskItemProps) 
       <div className="space-y-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1">
-            <h3 className="text-sm font-medium text-tg-text">{task.title}</h3>
+            <h3 className={`text-sm font-medium text-tg-text ${status === "completed" ? "line-through opacity-60" : ""}`}>{task.title}</h3>
             <span className="text-xs text-[var(--tg-theme-hint-color)]">{dueTime}</span>
           </div>
 
@@ -72,7 +78,12 @@ export function TaskItem({ task, onComplete, onEdit, onDelete }: TaskItemProps) 
             </motion.button>
             <motion.button
               onClick={() => {
-                if (window.confirm('Удалить задачу "' + task.title + '"?')) {
+                const tg = window.Telegram?.WebApp;
+                if (tg?.showConfirm) {
+                  tg.showConfirm(`Удалить задачу "${task.title}"?`, (ok: boolean) => {
+                    if (ok) onDelete(task.id);
+                  });
+                } else if (window.confirm(`Удалить задачу "${task.title}"?`)) {
                   onDelete(task.id);
                 }
               }}
@@ -91,11 +102,17 @@ export function TaskItem({ task, onComplete, onEdit, onDelete }: TaskItemProps) 
           {categoryName}
         </span>
 
-        <div className="h-1 w-full overflow-hidden rounded-full bg-[var(--tg-theme-hint-color)]/20">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--tg-theme-hint-color)]/15">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-500"
+            className={`h-full rounded-full ${
+              status === "completed"
+                ? "bg-emerald-500"
+                : status === "overdue"
+                  ? "bg-red-500"
+                  : "bg-gradient-to-r from-blue-500 to-cyan-500"
+            }`}
             initial={{ width: "0%" }}
-            animate={{ width: `${progress}%` }}
+            animate={{ width: `${status === "completed" ? 100 : progress}%` }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           />
         </div>

@@ -65,6 +65,7 @@ export function ExerciseHistoryModal({
               <button
                 onClick={onClose}
                 className="rounded-lg p-1 hover:bg-[var(--tg-theme-secondary-bg-color)]"
+                type="button"
               >
                 <X size={20} className="text-tg-text" />
               </button>
