@@ -25,4 +25,6 @@ RUN pip install --no-cache-dir --upgrade pip \
 COPY . /app/
 COPY --from=frontend /app/templates/dist /app/templates/dist
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+RUN python manage.py collectstatic --noinput || true
+
+CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "120"]
