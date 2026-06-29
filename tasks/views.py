@@ -120,7 +120,6 @@ class TaskListCreateAPIView(generics.ListCreateAPIView):
         return (
             Task.objects.filter(user=self.request.user)
             .select_related("category")
-            .order_by("-date")
         )
 
     def perform_create(self, serializer):
@@ -147,7 +146,6 @@ class TaskDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         return (
             Task.objects.filter(user=self.request.user)
             .select_related("category")
-            .order_by("-date")
         )
 
 

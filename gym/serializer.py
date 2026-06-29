@@ -12,7 +12,6 @@ class MuscleCategorySerializer(serializers.ModelSerializer):
 
 class ExerciseCatalogSerializer(serializers.ModelSerializer):
     muscle_category_name = serializers.ReadOnlyField(source="muscle_category.name")
-    description = serializers.CharField(source="technique", read_only=True)
 
     class Meta:
         model = ExerciseCatalog
@@ -22,7 +21,6 @@ class ExerciseCatalogSerializer(serializers.ModelSerializer):
             "muscle_category",
             "muscle_category_name",
             "technique",
-            "description",
         ]
 
 
@@ -86,6 +84,12 @@ class WorkoutSerializer(serializers.ModelSerializer):
     total_volume = serializers.SerializerMethodField()
     task = serializers.PrimaryKeyRelatedField(queryset=Task.objects.all())
     is_finished = serializers.BooleanField(required=False, default=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get('request')
+        if request and hasattr(request, 'user') and request.user.is_authenticated:
+            self.fields['task'].queryset = Task.objects.filter(user=request.user)
 
     class Meta:
         model = Workout

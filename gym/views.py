@@ -79,7 +79,6 @@ class WorkoutHistoryListView(generics.ListAPIView):
             Workout.objects.filter(user=self.request.user, is_finished=True)
             .select_related("task")
             .prefetch_related("sets__exercise__muscle_category")
-            .order_by("-date")
         )
 
 
@@ -92,7 +91,6 @@ class WorkoutCreateAPIView(generics.ListCreateAPIView):
             Workout.objects.filter(user=self.request.user)
             .select_related("task")
             .prefetch_related("sets__exercise__muscle_category")
-            .order_by("-date")
         )
 
     def create(self, request, *args, **kwargs):
@@ -108,7 +106,12 @@ class WorkoutCreateAPIView(generics.ListCreateAPIView):
             },
         )
 
-        output_serializer = self.get_serializer(workout)
+        refreshed = (
+            Workout.objects.select_related("task")
+            .prefetch_related("sets__exercise__muscle_category")
+            .get(pk=workout.pk)
+        )
+        output_serializer = self.get_serializer(refreshed)
         response_status = status.HTTP_201_CREATED if created else status.HTTP_200_OK
         return Response(output_serializer.data, status=response_status)
 

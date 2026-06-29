@@ -20,6 +20,5 @@ urlpatterns = [
     path("workouts/<int:pk>/finish/", WorkoutFinishAPIView.as_view()),
     path("workouts/<int:pk>/", WorkoutByIdDetailAPIView.as_view()),
     path("sets/", SetLogCreateAPIView.as_view()),
-    path("sets/add/", SetLogCreateAPIView.as_view()),
     path("history/", WorkoutHistoryListView.as_view()),
 ]
