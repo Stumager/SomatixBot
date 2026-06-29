@@ -14,14 +14,7 @@ services:
   web:
     build: .
     container_name: tasker_web
-    command: >
-      sh -c "cd /app/templates
-      && npm ci
-      && npm run build
-      && cd /app
-      && python manage.py runserver 0.0.0.0:8000"
-    volumes:
-      - .:/app
+    command: python manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
     env_file:
