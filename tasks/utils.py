@@ -1,4 +1,6 @@
 import logging
+import os
+import tempfile
 
 import requests
 from django.conf import settings
@@ -8,6 +10,29 @@ from datetime import timedelta
 from .models import Task
 
 logger = logging.getLogger(__name__)
+
+_lock_file_handle = None
+
+
+def acquire_scheduler_lock():
+    """Ensure only one process (e.g. one gunicorn worker) runs the scheduler."""
+    global _lock_file_handle
+    try:
+        import fcntl
+    except ImportError:
+        # Not on Linux (e.g. local Windows dev) — just allow it.
+        return True
+
+    lock_path = os.path.join(tempfile.gettempdir(), 'tasktracker_scheduler.lock')
+    handle = open(lock_path, 'w')
+    try:
+        fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        handle.close()
+        return False
+
+    _lock_file_handle = handle  # keep reference so the lock isn't released
+    return True
 
 
 def send_telegram_message(user_id, text):
