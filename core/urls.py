@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('tasks.urls')),
     path('api/gym/', include('gym.urls')),
+    path('api/finance/', include('finance.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('', frontend_index, name='frontend_root'),
     path('tasks/', frontend_index, name='frontend_tasks'),

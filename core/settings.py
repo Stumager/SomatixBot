@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'tasks.apps.TasksConfig',
     'gym.apps.GymConfig',
+    'finance.apps.FinanceConfig',
 ]
 
 REST_FRAMEWORK = {
