@@ -28,6 +28,11 @@ export interface TelegramWebApp {
   setBackgroundColor?: (color: "bg_color" | "secondary_bg_color" | string) => void;
   showConfirm?: (message: string, callback: (ok: boolean) => void) => void;
   showAlert?: (message: string, callback?: () => void) => void;
+  HapticFeedback?: {
+    impactOccurred: (style: "light" | "medium" | "heavy" | "rigid" | "soft") => void;
+    notificationOccurred: (type: "error" | "success" | "warning") => void;
+    selectionChanged: () => void;
+  };
 }
 
 declare global {
