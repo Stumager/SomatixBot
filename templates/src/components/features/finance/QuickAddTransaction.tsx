@@ -32,9 +32,10 @@ function useTopCategories(type: CategoryType, allCategories: Category[], n = 6) 
 interface AmountFormProps {
   category: Category;
   onClose: () => void;
+  onDone?: () => void;
 }
 
-function AmountForm({ category, onClose }: AmountFormProps) {
+function AmountForm({ category, onClose, onDone }: AmountFormProps) {
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [showNote, setShowNote] = useState(false);
@@ -79,7 +80,7 @@ function AmountForm({ category, onClose }: AmountFormProps) {
       });
       if (accountId !== activeAccountId) setActiveAccount(accountId);
       window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred("success");
-      onClose();
+      onDone ? onDone() : onClose();
     } catch {
       setError("Не удалось сохранить. Попробуй ещё раз.");
     }
@@ -173,7 +174,11 @@ function AmountForm({ category, onClose }: AmountFormProps) {
   );
 }
 
-export function QuickAddTransaction() {
+interface QuickAddProps {
+  onDone?: () => void;
+}
+
+export function QuickAddTransaction({ onDone }: QuickAddProps = {}) {
   const { transactionType, setTransactionType } = useFinanceStore();
   const { data: allCategories = [] } = useFinanceCategories();
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
@@ -243,6 +248,7 @@ export function QuickAddTransaction() {
             key={selectedCategory.id}
             category={selectedCategory}
             onClose={() => setSelectedCategory(null)}
+            onDone={onDone}
           />
         )}
       </AnimatePresence>

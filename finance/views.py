@@ -140,6 +140,16 @@ class SummaryView(APIView):
             except ValueError:
                 return Response({'detail': 'Неверный формат года.'}, status=400)
             qs = qs.filter(date__year=year)
+        elif period == 'week' and date_param:
+            try:
+                from datetime import timedelta
+                from datetime import date as date_cls
+                anchor = date_cls.fromisoformat(date_param)
+                week_start = anchor - timedelta(days=anchor.weekday())
+                week_end = week_start + timedelta(days=6)
+            except (ValueError, AttributeError):
+                return Response({'detail': 'Неверный формат даты. Ожидается YYYY-MM-DD.'}, status=400)
+            qs = qs.filter(date__gte=week_start, date__lte=week_end)
 
         totals = qs.filter(transaction_type__in=['income', 'expense']).values('transaction_type').annotate(
             total=Sum('amount')

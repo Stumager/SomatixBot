@@ -111,7 +111,7 @@ export function useDeleteTransaction() {
 
 // ─── Analytics ───────────────────────────────────────────────────────────────
 
-export function useSummary(period = "month", date?: string) {
+export function useSummary(period: "week" | "month" | "year" = "month", date?: string) {
   return useQuery({
     queryKey: ["finance", "summary", period, date],
     queryFn: async () => {
