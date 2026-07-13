@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type AppTab = "tasker" | "gym";
+export type AppTab = "tasker" | "gym" | "finance";
 export type ModalName = "task-editor" | "workout-start" | null;
 
 interface UiState {

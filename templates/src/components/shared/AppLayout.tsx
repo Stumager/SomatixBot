@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { GymView } from "../features/GymView";
 import { TaskerView } from "../features/TaskerView";
+import { FinanceView } from "../features/FinanceView";
 import { TabNavigation } from "./TabNavigation";
 import { useUiStore } from "../../store/ui";
 
@@ -20,7 +21,13 @@ export function AppLayout() {
       </header>
 
       <main className="mx-auto w-full max-w-screen-sm px-4 py-4 flex-1">
-        {activeTab === "tasker" ? <TaskerView /> : <GymView />}
+        {activeTab === "tasker" ? (
+          <TaskerView />
+        ) : activeTab === "gym" ? (
+          <GymView />
+        ) : (
+          <FinanceView />
+        )}
       </main>
 
       <div className="h-2" />

@@ -5,6 +5,7 @@ import { useUiStore } from "../../store/ui";
 const tabs: Array<{ id: AppTab; label: string }> = [
   { id: "tasker", label: "Задачи" },
   { id: "gym", label: "Тренировка" },
+  { id: "finance", label: "Финансы" },
 ];
 
 export function TabNavigation() {
@@ -12,7 +13,7 @@ export function TabNavigation() {
   const setActiveTab = useUiStore((state) => state.setActiveTab);
 
   return (
-    <nav className="grid grid-cols-2 gap-2" aria-label="Основные разделы">
+    <nav className="grid grid-cols-3 gap-2" aria-label="Основные разделы">
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
 
