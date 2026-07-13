@@ -19,6 +19,8 @@ class Migration(migrations.Migration):
             model_name='task',
             name='user',
             field=models.ForeignKey(
+                blank=True,
+                null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name='tasks',
                 to=settings.AUTH_USER_MODEL,
